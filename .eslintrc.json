@@ -1,0 +1,52 @@
+{
+  "extends": [
+    "next",
+    "next/core-web-vitals",
+    "airbnb",
+    "airbnb/hooks"
+  ],
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true,
+    "jest": true
+  },
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest"
+  },
+  "rules": {
+    "jsx-a11y/label-has-associated-control": 0,
+    "@next/next/no-img-element": 0,
+    "default-param-last": 0,
+    "import/prefer-default-export": 0,
+    "import/extensions": 0,
+    "import/no-named-default": 0,
+    "max-len": [1, { "code": 500 }],
+    "no-param-reassign": ["error", { "props": true, "ignorePropertyModificationsFor": ["state", "ctx"] }],
+    "no-return-await": 0,
+    "no-underscore-dangle": 0,
+    "react/destructuring-assignment": 0,
+    "react/jsx-filename-extension": 0,
+    "react/jsx-props-no-spreading": 0,
+    "react/no-array-index-key": 0,
+    "react/prop-types": 0,
+    "react/react-in-jsx-scope": 0,
+    "react-hooks/exhaustive-deps": 0,
+    "react/function-component-definition": 0,
+    "jsx-a11y/click-events-have-key-events": 0,
+    "jsx-a11y/no-static-element-interactions": 0
+  },
+  "plugins": [
+    "sort-keys-fix",
+    "simple-import-sort"
+  ],
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "src/assets"
+  ]
+}
