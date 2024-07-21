@@ -1,8 +1,6 @@
 import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
 
-console.log(process.env.LLAMA_API_KEY);
-
 const openai = new OpenAI({
   apiKey: process.env.LLAMA_API_KEY,
   baseURL: 'https://api.llama-api.com',
@@ -10,7 +8,12 @@ const openai = new OpenAI({
 
 export async function POST(req) {
   try {
-    const { message } = req.body;
+    const body = await req.json();
+    const { message } = body;
+
+    if (!message) {
+      return NextResponse.json({ message: 'Message is missing' }, { status: 400 });
+    }
     const completion = await openai.chat.completions.create({
       messages: [
         { role: 'system', content: 'Assistant is a large language model trained by OpenAI.' },
