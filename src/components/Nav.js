@@ -31,13 +31,14 @@ export function Nav({ links, isCollapsed, onNewChat }) {
           <Tooltip key={index} delayDuration={0}>
             <TooltipTrigger asChild>
               <button
-                onClick={() => handleLinkClick(link)}
+                type="button"
                 className={cn(
                   buttonVariants({ variant: link.variant, size: 'icon' }),
                   'h-9 w-9',
                   link.variant === 'default'
                   && 'dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white',
                 )}
+                onClick={() => handleLinkClick(link)}
               >
                 <link.icon className="h-4 w-4" />
                 <span className="sr-only">{link.title}</span>
@@ -54,14 +55,15 @@ export function Nav({ links, isCollapsed, onNewChat }) {
           </Tooltip>
         ) : (
           <button
+            type="button"
             key={index}
-            onClick={() => handleLinkClick(link)}
             className={cn(
               buttonVariants({ variant: link.variant, size: 'sm' }),
               link.variant === 'default'
               && 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white',
               'justify-start w-full',
             )}
+            onClick={() => handleLinkClick(link)}
           >
             <link.icon className="mr-2 h-4 w-4" />
             {link.title}

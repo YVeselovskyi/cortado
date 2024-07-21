@@ -1,5 +1,3 @@
-// components/ChatHistory.jsx
-
 'use client';
 
 import { useRouter } from 'next/navigation';

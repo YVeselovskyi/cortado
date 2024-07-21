@@ -1,10 +1,10 @@
-// components/ChatInterface.jsx
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { loadChats, addMessageToChat } from '@/lib/localStorage';
+import { loadChats, addMessageToChat, updateLastMessage } from '@/lib/localStorage';
+
+import { streamingFetch } from '@/lib/streamingFetch';
 
 import ChatHistory from './ChatHistory';
 import ChatInput from './ChatInput';
@@ -14,6 +14,7 @@ export default function ChatInterface() {
   const params = useParams();
   const id = params?.id;
   const [chats, setChats] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     const loadedChats = loadChats();
@@ -24,28 +25,55 @@ export default function ChatInterface() {
     const userMessage = { role: 'user', content: message };
     addMessageToChat(Number(id), userMessage);
     setChats(loadChats());
+
+    setIsTyping(true);
     try {
-      const response = await fetch('/api/chat', {
+      const response = await streamingFetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ message, chatId: id }),
       });
+
+      const reader = response.body.getReader();
+      const aiMessage = { role: 'assistant', content: '' };
+      addMessageToChat(Number(id), aiMessage);
+
+      while (true) {
+        // eslint-disable-next-line no-await-in-loop
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        let chunk;
+
+        if (value instanceof ArrayBuffer || value instanceof Uint8Array) {
+          chunk = new TextDecoder().decode(value);
+        } else {
+          // Assume it's already a string
+          chunk = value;
+        }
+        const lines = chunk.split('\n').filter((line) => line.trim() !== '');
+
+        // eslint-disable-next-line no-restricted-syntax
+        for (const line of lines) {
+          try {
+            const [, content] = line.split(':');
+            if (content) {
+              aiMessage.content += JSON.parse(content);
+              updateLastMessage(Number(id), aiMessage);
+              setChats(loadChats());
+            }
+          } catch (e) {
+            console.warn('Error parsing chunk:', e);
+          }
+        }
+      }
 
       if (!response.ok) {
         throw new Error('Failed to get response from ChatGPT');
       }
-
-      const data = await response.json();
-
-      // Add AI response to chat
-      const aiMessage = { role: 'assistant', content: data.message };
-      addMessageToChat(Number(id), aiMessage);
-      setChats(loadChats());
     } catch (error) {
       console.error('Error:', error);
-      // Handle error (e.g., show error message to user)
+    } finally {
+      setIsTyping(false);
     }
   };
 
@@ -60,7 +88,7 @@ export default function ChatInterface() {
       <div className="flex-1 flex flex-col">
         {id ? (
           <>
-            <ChatResponseBlock chatId={id} chats={chats} />
+            <ChatResponseBlock chatId={id} chats={chats} isTyping={isTyping} />
             <ChatInput chatId={id} onSendMessage={handleSendMessage} />
           </>
         ) : (

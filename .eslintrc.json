@@ -47,7 +47,8 @@
   "ignorePatterns": [
     "node_modules/",
     ".next/",
-    "src/assets"
+    "src/assets",
+    "src/components/ui"
   ],
   "settings": {
     "import/resolver": {

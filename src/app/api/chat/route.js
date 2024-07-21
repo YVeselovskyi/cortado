@@ -1,30 +1,25 @@
 import OpenAI from 'openai';
-import { NextResponse } from 'next/server';
+import { OpenAIStream, StreamingTextResponse } from 'ai';
 
 const openai = new OpenAI({
-  apiKey: process.env.LLAMA_API_KEY,
-  baseURL: 'https://api.llama-api.com',
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
+export const runtime = 'edge';
+
 export async function POST(req) {
-  try {
-    const body = await req.json();
-    const { message } = body;
+  const body = await req.json();
+  const { message } = body;
+  const response = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    stream: true,
+    messages: [
+      { role: 'system', content: 'You are a room reservation assistant' },
+      { role: 'user', content: message },
+    ],
+  });
 
-    if (!message) {
-      return NextResponse.json({ message: 'Message is missing' }, { status: 400 });
-    }
-    const completion = await openai.chat.completions.create({
-      messages: [
-        { role: 'system', content: 'Assistant is a large language model trained by OpenAI.' },
-        { role: 'user', content: message },
-      ],
-      model: 'llama-13b-chat',
-    });
+  const stream = OpenAIStream(response);
 
-    return NextResponse.json({ message: completion.choices[0].message.content }, { status: 200 });
-  } catch (error) {
-    console.error('Error:', error);
-    return NextResponse.json({ message: 'Failed to get response from LLama' }, { status: 500 });
-  }
+  return new StreamingTextResponse(stream);
 }

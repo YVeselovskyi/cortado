@@ -21,3 +21,13 @@ export const addMessageToChat = (chatId, message) => {
     saveChats(chats);
   }
 };
+
+export const updateLastMessage = (chatId, message) => {
+  const chats = loadChats();
+  const chatIndex = chats.findIndex((chat) => chat.id === chatId);
+  if (chatIndex !== -1) {
+    chats[chatIndex].messages[chats[chatIndex].messages.length - 1] = message;
+    chats[chatIndex].lastUpdated = new Date().toISOString();
+    saveChats(chats);
+  }
+};
